@@ -47,15 +47,17 @@ contract Auction {
 
     function placeBid(uint256 _nftId) public payable {
         Listing storage l = listings[_nftId];
+
         require(l.isActive, "Not active");
         require(msg.value > l.highestBid, "Bid too low");
         require(msg.value >= l.minBid, "Below minimum");
 
+        // refund previous highest bidder
         if (l.highestBidder != address(0)) {
             payable(l.highestBidder).transfer(l.highestBid);
         }
 
-        l.highestBid    = msg.value;
+        l.highestBid = msg.value;
         l.highestBidder = msg.sender;
 
         emit BidPlaced(_nftId, msg.sender, msg.value);
@@ -63,17 +65,34 @@ contract Auction {
 
     function acceptBid(uint256 _nftId) public {
         Listing storage l = listings[_nftId];
+
         require(l.seller == msg.sender, "Not seller");
         require(l.isActive, "Not active");
         require(l.highestBidder != address(0), "No bids");
 
-        l.isActive  = false;
+        l.isActive = false;
         l.isSettled = true;
 
+        // transfer money to seller
         payable(l.seller).transfer(l.highestBid);
+
+        // transfer NFT to highest bidder
         invoiceNFT.transferFrom(address(this), l.highestBidder, _nftId);
 
         emit BidAccepted(_nftId, l.highestBidder, l.highestBid);
+    }
+
+    // 🔥 Added cancel listing (good feature for demo)
+    function cancelListing(uint256 _nftId) public {
+        Listing storage l = listings[_nftId];
+
+        require(l.seller == msg.sender, "Not seller");
+        require(l.isActive, "Not active");
+
+        l.isActive = false;
+
+        // return NFT to seller
+        invoiceNFT.transferFrom(address(this), l.seller, _nftId);
     }
 
     function getListing(uint256 _nftId) public view returns (Listing memory) {
