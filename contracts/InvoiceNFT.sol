@@ -19,6 +19,7 @@ contract InvoiceNFT is ERC721 {
     }
 
     mapping(uint256 => Invoice) public invoices;
+    uint256 public totalMinted;
     mapping(address => uint256) public reputationScore;
 
     event InvoiceMinted(uint256 indexed id, address seller, uint256 amount);
@@ -33,6 +34,7 @@ contract InvoiceNFT is ERC721 {
         string memory _proofHash
     ) public returns (uint256) {
         _tokenIds++;
+        totalMinted = _tokenIds;
         uint256 newId = _tokenIds;
 
         _mint(msg.sender, newId);
