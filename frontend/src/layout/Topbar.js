@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function Topbar({ page, setPage }) {
+export default function Topbar({ page, setPage, wallet, handleConnect }) {
 
     const titles = {
         dashboard: "Dashboard",
@@ -34,6 +34,33 @@ export default function Topbar({ page, setPage }) {
                 >
                     + New Invoice
                 </button>
+
+
+                {!wallet && (
+
+                    <button
+                        className="btn-ghost"
+                        onClick={handleConnect}
+                    >
+                        Connect Wallet
+                    </button>
+
+                )}
+
+
+                {wallet && (
+
+                    <div
+                        className="btn-ghost"
+                        style={{
+                            cursor: "default"
+                        }}
+                    >
+                        {wallet.slice(0,6)}...
+                        {wallet.slice(-4)}
+                    </div>
+
+                )}
 
             </div>
 

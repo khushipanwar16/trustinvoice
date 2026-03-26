@@ -160,9 +160,9 @@ export default function Dashboard() {
 
 
     return (
-
-        <div>
-
+        
+        
+            <div className="page-container">
             <div style={{ marginBottom: "20px" }}>
                 <button
                     className="btn-accent"
@@ -324,14 +324,14 @@ export default function Dashboard() {
                         </div>
 
 
-                        <div className="row-action">
+                                            <div className="row-action">
 
-                            <button
-    className="row-btn"
-    onClick={() => setSelectedInvoice(inv)}
->
-    View
-</button>
+                                                <button
+                        className="row-btn"
+                        onClick={() => setSelectedInvoice(inv)}
+                    >
+                        View
+                    </button>
 
                         </div>
 
@@ -469,14 +469,7 @@ export default function Dashboard() {
                 }}
             />
 
-            <CreateInvoiceModal
-    open={showModal}
-    onClose={() => setShowModal(false)}
-    onCreate={(data) => {
-        console.log(data);
-        setShowModal(false);
-    }}
-/>
+            
 
 <InvoiceDetailModal
     open={!!selectedInvoice}
@@ -487,7 +480,7 @@ export default function Dashboard() {
 
 
         </div>
-
+        
     );
 
 }

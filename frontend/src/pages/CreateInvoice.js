@@ -4,267 +4,173 @@ import { getContracts } from "../utils/contract";
 
 export default function CreateInvoice() {
 
-    const [form, setForm] = useState({
-        buyerAddress: "",
-        amount: "",
-        dueDate: ""
-    });
-
-    const [loading, setLoading] = useState(false);
-    const [mintedId, setMintedId] = useState(null);
+    const [buyer, setBuyer] = useState("");
+    const [amount, setAmount] = useState("");
+    const [dueDate, setDueDate] = useState("");
     const [minBid, setMinBid] = useState("");
-    const [listing, setListing] = useState(false);
+    const [loading, setLoading] = useState(false);
 
-
-    async function handleMint() {
-
-        if (!form.buyerAddress || !form.amount || !form.dueDate) {
-            alert("Please fill all fields!");
-            return;
-        }
-
-        setLoading(true);
+    async function createInvoice() {
 
         try {
 
-            const { nftContract } = await getContracts();
+            setLoading(true);
 
-            const amountWei = ethers.parseEther(form.amount);
+            const {
+                nftContract,
+                auctionContract
+            } = await getContracts();
 
-            const dueDateUnix = Math.floor(
-                new Date(form.dueDate).getTime() / 1000
-            );
-
+            // mint invoice NFT
             const tx = await nftContract.mintInvoice(
-                form.buyerAddress,
-                amountWei,
-                dueDateUnix,
-                "ipfs://proof"
+
+                buyer,
+
+                ethers.parseEther(amount),
+
+                Math.floor(
+                    new Date(dueDate).getTime() / 1000
+                ),
+
+                "ipfs://placeholder"
             );
 
             const receipt = await tx.wait();
 
-            const event = receipt.logs[0];
-            const tokenId = parseInt(event.topics[3], 16);
+            // get token id
+            const tokenId =
+                receipt.logs[0].topics[3];
 
-            setMintedId(tokenId);
+            const id =
+                parseInt(tokenId, 16);
 
-            alert("✅ Invoice NFT Minted!");
+            // approve auction contract
+            const approveTx =
+                await nftContract.approve(
+
+                    auctionContract.target,
+
+                    id
+
+                );
+
+            await approveTx.wait();
+
+
+            // list auction
+            const listTx =
+                await auctionContract.listInvoice(
+
+                    id,
+
+                    ethers.parseEther(minBid)
+
+                );
+
+            await listTx.wait();
+
+            alert("Invoice Created & Listed!");
+
+            setBuyer("");
+            setAmount("");
+            setDueDate("");
+            setMinBid("");
 
         } catch (err) {
 
             console.error(err);
-            alert("Error: " + err.message);
+
+            alert("Error creating invoice");
 
         }
 
         setLoading(false);
+
     }
-
-
-
-    async function handleList() {
-
-        if (!minBid) {
-            alert("Enter minimum bid!");
-            return;
-        }
-
-        setListing(true);
-
-        try {
-
-            const { nftContract, auctionContract } = await getContracts();
-
-            const approveTx = await nftContract.approve(
-                auctionContract.target,
-                mintedId
-            );
-
-            await approveTx.wait();
-
-            const listTx = await auctionContract.listInvoice(
-                mintedId,
-                ethers.parseEther(minBid)
-            );
-
-            await listTx.wait();
-
-            alert("✅ Listed for Auction!");
-
-            setMintedId(null);
-
-            setForm({
-                buyerAddress: "",
-                amount: "",
-                dueDate: ""
-            });
-
-        } catch (err) {
-
-            console.error(err);
-            alert("Error: " + err.message);
-
-        }
-
-        setListing(false);
-    }
-
 
 
     return (
 
-        <div style={{
-            maxWidth: "600px",
-            margin: "60px auto",
-            padding: "30px",
-            background: "white",
-            borderRadius: "16px",
-            boxShadow: "0 10px 40px rgba(0,0,0,0.05)"
-        }}>
+        <div className="page-container form-container">
+    <div className="card"></div>
 
-            <h1 style={{
-                marginBottom: "20px",
-                textAlign: "center"
-            }}>
-                Create Invoice NFT
-            </h1>
+            <h2>Create Invoice</h2>
 
 
-            <Input
-                label="Buyer Address"
-                value={form.buyerAddress}
-                onChange={e =>
-                    setForm({
-                        ...form,
-                        buyerAddress: e.target.value
-                    })
-                }
-            />
+            <div className="form-group">
+
+                <label>Buyer Address</label>
+
+                <input
+                    className="form-input"
+                    placeholder="0x..."
+                    value={buyer}
+                    onChange={(e) =>
+                        setBuyer(e.target.value)
+                    }
+                />
+
+            </div>
 
 
-            <Input
-                label="Amount (ETH)"
-                type="number"
-                value={form.amount}
-                onChange={e =>
-                    setForm({
-                        ...form,
-                        amount: e.target.value
-                    })
-                }
-            />
+            <div className="form-group">
+
+                <label>Amount (ETH)</label>
+
+                <input
+                    className="form-input"
+                    placeholder="0.5"
+                    value={amount}
+                    onChange={(e) =>
+                        setAmount(e.target.value)
+                    }
+                />
+
+            </div>
 
 
-            <Input
-                label="Due Date"
-                type="date"
-                value={form.dueDate}
-                onChange={e =>
-                    setForm({
-                        ...form,
-                        dueDate: e.target.value
-                    })
-                }
-            />
+            <div className="form-group">
+
+                <label>Minimum Bid</label>
+
+                <input
+                    className="form-input"
+                    placeholder="0.4"
+                    value={minBid}
+                    onChange={(e) =>
+                        setMinBid(e.target.value)
+                    }
+                />
+
+            </div>
+
+
+            <div className="form-group">
+
+                <label>Due Date</label>
+
+                <input
+                    className="form-input"
+                    type="date"
+                    value={dueDate}
+                    onChange={(e) =>
+                        setDueDate(e.target.value)
+                    }
+                />
+
+            </div>
 
 
             <button
-                onClick={handleMint}
-                disabled={loading || mintedId}
-                style={{
-                    width: "100%",
-                    marginTop: "20px",
-                    padding: "14px",
-                    background: "#2563eb",
-                    color: "white",
-                    borderRadius: "10px",
-                    border: "none",
-                    fontWeight: "600",
-                    cursor: "pointer"
-                }}
+                className="btn-accent"
+                onClick={createInvoice}
             >
+
                 {loading
-                    ? "Minting..."
-                    : mintedId
-                        ? `Minted #${mintedId}`
-                        : "Mint Invoice"}
+                    ? "Creating..."
+                    : "Create & List"}
+
             </button>
-
-
-
-            {mintedId && (
-
-                <div style={{
-                    marginTop: "30px",
-                    padding: "20px",
-                    background: "#f8fafc",
-                    borderRadius: "12px"
-                }}>
-
-                    <Input
-                        label="Minimum Bid (ETH)"
-                        type="number"
-                        onChange={e => setMinBid(e.target.value)}
-                    />
-
-                    <button
-                        onClick={handleList}
-                        disabled={listing}
-                        style={{
-                            width: "100%",
-                            marginTop: "12px",
-                            padding: "12px",
-                            background: "#16a34a",
-                            color: "white",
-                            border: "none",
-                            borderRadius: "8px",
-                            fontWeight: "600",
-                            cursor: "pointer"
-                        }}
-                    >
-                        {listing
-                            ? "Listing..."
-                            : "List for Auction"}
-                    </button>
-
-                </div>
-
-            )}
-
-        </div>
-
-    );
-
-}
-
-
-
-function Input({ label, ...props }) {
-
-    return (
-
-        <div style={{
-            marginBottom: "16px"
-        }}>
-
-            <label style={{
-                display: "block",
-                marginBottom: "6px",
-                fontWeight: "500"
-            }}>
-                {label}
-            </label>
-
-            <input
-                {...props}
-                style={{
-                    width: "100%",
-                    padding: "12px",
-                    borderRadius: "8px",
-                    border: "1px solid #e5e7eb"
-                }}
-            />
 
         </div>
 

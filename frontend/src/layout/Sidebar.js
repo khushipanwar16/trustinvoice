@@ -8,15 +8,11 @@ export default function Sidebar({ page, setPage, wallet }) {
             className={`nav-item ${page === value ? "active" : ""}`}
             onClick={() => setPage(value)}
         >
-
-            {icon}
-
+            <span style={{ marginRight: "8px" }}>{icon}</span>
             {label}
-
         </div>
 
     );
-
 
 
     return (
@@ -29,9 +25,9 @@ export default function Sidebar({ page, setPage, wallet }) {
                     🔗
                 </div>
 
-                <div className="sidebar-logo-text">
-                    Trust<span>Invoice</span>
-                </div>
+               <div className="sidebar-logo-text brand">
+TrustInvoice
+</div>
 
             </div>
 
@@ -43,6 +39,12 @@ export default function Sidebar({ page, setPage, wallet }) {
 
 
             <Item
+                label="Home"
+                value="home"
+                icon="🏠"
+            />
+
+            <Item
                 label="Dashboard"
                 value="dashboard"
                 icon="📊"
@@ -50,16 +52,21 @@ export default function Sidebar({ page, setPage, wallet }) {
 
 
             <Item
-                label="Create Invoice"
-                value="create"
-                icon="🧾"
-            />
-
-
-            <Item
                 label="Marketplace"
                 value="marketplace"
                 icon="🏪"
+            />
+
+
+            <div className="nav-label">
+                ACTIONS
+            </div>
+
+
+            <Item
+                label="Create Invoice"
+                value="create"
+                icon="➕"
             />
 
 
@@ -71,7 +78,7 @@ export default function Sidebar({ page, setPage, wallet }) {
                     <div className="wallet-dot" />
 
                     <div className="wallet-label">
-                        Connected
+                        {wallet ? "Connected" : "Disconnected"}
                     </div>
 
                 </div>

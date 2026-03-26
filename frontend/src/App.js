@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { connectWallet } from "./utils/contract";
 
 import Home from "./pages/Home";
-import CreateInvoice from "./pages/CreateInvoice";
 import Marketplace from "./pages/Marketplace";
 import Dashboard from "./pages/Dashboard";
+import CreateInvoice from "./pages/CreateInvoice";
 
 import Sidebar from "./layout/Sidebar";
 import Topbar from "./layout/Topbar";
@@ -14,7 +14,7 @@ import "./styles/trustinvoice.css";
 export default function App() {
 
     const [wallet, setWallet] = useState("");
-    const [page, setPage] = useState("dashboard");
+    const [page, setPage] = useState("home");
 
 
     useEffect(() => {
@@ -27,6 +27,7 @@ export default function App() {
 
                     if (accounts.length > 0) {
                         setWallet(accounts[0]);
+                        setPage("dashboard");
                     }
 
                 });
@@ -43,6 +44,7 @@ export default function App() {
 
         if (address) {
             setWallet(address);
+            setPage("dashboard");
         }
 
     }
@@ -65,15 +67,25 @@ export default function App() {
                 <Topbar
                     page={page}
                     setPage={setPage}
+                    handleConnect={handleConnect}
+                    wallet={wallet}
                 />
 
-                {page === "home" && <Home />}
+                {page === "home" && (
+                    <Home handleConnect={handleConnect} />
+                )}
 
-                {page === "create" && <CreateInvoice />}
+                {page === "dashboard" && (
+                    <Dashboard />
+                )}
 
-                {page === "marketplace" && <Marketplace />}
+                {page === "marketplace" && (
+                    <Marketplace />
+                )}
 
-                {page === "dashboard" && <Dashboard />}
+                {page === "create" && (
+                    <CreateInvoice />
+                )}
 
             </div>
 

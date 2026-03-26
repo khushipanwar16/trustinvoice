@@ -7,8 +7,6 @@ export default function Marketplace() {
     const [listings, setListings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [bidAmount, setBidAmount] = useState({});
-    const [bidLoading, setBidLoading] = useState({});
-    const [error, setError] = useState("");
 
 
     useEffect(() => {
@@ -18,51 +16,26 @@ export default function Marketplace() {
 
     async function loadListings() {
 
-        setLoading(true);
-        setError("");
-
         try {
 
-            const {
-                auctionContract,
-                nftContract
-            } = await getContracts();
+            const { auctionContract, nftContract } = await getContracts();
 
+            const items = [];
 
-            let total = 0;
-
-            try {
-                total = Number(
-                    await nftContract.totalMinted()
-                );
-            } catch {
-                total = 50;
-            }
-
-
-            const found = [];
-
-            for (let i = 1; i <= total; i++) {
+            for (let i = 1; i <= 20; i++) {
 
                 try {
 
-                    const listing =
-                        await auctionContract.getListing(i);
+                    const listing = await auctionContract.getListing(i);
 
                     if (listing.isActive) {
 
-                        const invoice =
-                            await nftContract.getInvoice(i);
+                        const invoice = await nftContract.getInvoice(i);
 
-                        found.push({
-
-                            nftId: i,
-                            seller: listing.seller,
-                            minBid: listing.minBid,
-                            highestBid: listing.highestBid,
-                            highestBidder: listing.highestBidder,
-                            invoice
-
+                        items.push({
+                            id: i,
+                            amount: invoice.amount,
+                            seller: listing.seller
                         });
 
                     }
@@ -71,12 +44,11 @@ export default function Marketplace() {
 
             }
 
-            setListings(found);
+            setListings(items);
 
         } catch (err) {
 
             console.error(err);
-            setError("Failed to load marketplace");
 
         }
 
@@ -84,206 +56,100 @@ export default function Marketplace() {
 
     }
 
+    async function handleBid(id) {
 
+    try {
 
-    async function handleBid(nftId) {
+        const { auctionContract } =
+            await getContracts();
 
-        try {
+        const amount =
+            bidAmount[id];
 
-            const amount = bidAmount[nftId];
+        const tx =
+            await auctionContract.placeBid(
 
-            if (!amount) {
-                alert("Enter bid amount");
-                return;
-            }
+                id,
 
-            setBidLoading({
-                ...bidLoading,
-                [nftId]: true
-            });
+                {
+                    value:
+                        ethers.parseEther(
+                            amount
+                        )
+                }
 
+            );
 
-            const { auctionContract } =
-                await getContracts();
+        await tx.wait();
 
-            const tx =
-                await auctionContract.placeBid(
-                    nftId,
-                    {
-                        value:
-                            ethers.parseEther(
-                                amount
-                            )
-                    }
-                );
+        alert("Bid placed!");
 
-            await tx.wait();
+    } catch (err) {
 
-            alert("✅ Bid placed");
-
-            loadListings();
-
-        } catch (err) {
-
-            alert(err.message);
-
-        }
-
-        setBidLoading({
-            ...bidLoading,
-            [nftId]: false
-        });
+        console.error(err);
+        alert("Error placing bid");
 
     }
 
+}
 
-
-    if (loading) return (
-        <div style={{ textAlign:"center", marginTop:"60px" }}>
-            Loading marketplace...
-        </div>
-    );
-
+    if (loading) return <div>Loading...</div>;
 
 
     return (
 
-        <div style={{
-            maxWidth: "1000px",
-            margin: "40px auto",
-            padding: "0 20px"
-        }}>
+     <div className="page-container marketplace-grid">
 
-            <h1 style={{
-                marginBottom: "20px"
-            }}>
-                Marketplace
-            </h1>
+        <h2>Marketplace</h2>
 
+        {listings.length === 0 && (
 
-            {error && (
-                <div>{error}</div>
-            )}
+            <div className="card">
+                No listings yet
+            </div>
 
+        )}
 
-            {listings.length === 0 && (
-                <p>No listings yet</p>
-            )}
+        {listings.map(item => (
 
+            <div className="card" key={item.id}>
 
-            <div style={{
-                display: "grid",
-                gridTemplateColumns:
-                    "repeat(auto-fit,minmax(280px,1fr))",
-                gap: "20px"
-            }}>
+                <h3>Invoice #{item.id}</h3>
 
-                {listings.map(item => (
+                <div>
+                    Amount:
+                    {ethers.formatEther(item.amount)} ETH
+                </div>
 
-                    <Card key={item.nftId}>
+                <br />
 
-                        <h3>
-                            Invoice #{item.nftId}
-                        </h3>
+                <input
+                    className="form-input"
+                    placeholder="Bid Amount (ETH)"
+                    onChange={(e) =>
+                        setBidAmount({
+                            ...bidAmount,
+                            [item.id]: e.target.value
+                        })
+                    }
+                />
 
+                <br />
 
-                        <p>
-                            Amount:
-                            {ethers.formatEther(
-                                item.invoice.amount
-                            )} ETH
-                        </p>
-
-
-                        <p>
-                            Min Bid:
-                            {ethers.formatEther(
-                                item.minBid
-                            )} ETH
-                        </p>
-
-
-                        <p>
-
-                            Highest Bid:
-
-                            {Number(item.highestBid) === 0
-                                ? "None"
-                                : ethers.formatEther(
-                                    item.highestBid
-                                ) + " ETH"}
-
-                        </p>
-
-
-                        <input
-                            placeholder="Bid amount"
-                            type="number"
-                            onChange={e =>
-                                setBidAmount({
-                                    ...bidAmount,
-                                    [item.nftId]:
-                                        e.target.value
-                                })
-                            }
-                        />
-
-
-                        <button
-                            disabled={
-                                bidLoading[item.nftId]
-                            }
-                            onClick={() =>
-                                handleBid(item.nftId)
-                            }
-                        >
-                            {bidLoading[item.nftId]
-                                ? "Bidding..."
-                                : "Place Bid"}
-                        </button>
-
-
-                    </Card>
-
-                ))}
+                <button
+                    className="btn-accent"
+                    onClick={() =>
+                        handleBid(item.id)
+                    }
+                >
+                    Place Bid
+                </button>
 
             </div>
 
+        ))}
 
-            <button
-                onClick={loadListings}
-                style={{
-                    marginTop: "20px"
-                }}
-            >
-                Refresh
-            </button>
+    </div>
 
-
-        </div>
-
-    );
-
-}
-
-
-
-function Card({ children }) {
-
-    return (
-
-        <div style={{
-            padding: "20px",
-            background: "white",
-            borderRadius: "14px",
-            boxShadow:
-                "0 4px 20px rgba(0,0,0,0.05)"
-        }}>
-
-            {children}
-
-        </div>
-
-    );
-
+);
 }

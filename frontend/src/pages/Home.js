@@ -1,99 +1,57 @@
 import { connectWallet } from "../utils/contract";
-import { useState } from "react";
 
-export default function Home() {
-
-    const [wallet, setWallet] = useState("");
-
-    async function handleConnect() {
-        const address = await connectWallet();
-        setWallet(address);
-    }
+export default function Home({ handleConnect }) {
 
     return (
 
-        <div style={{
-            textAlign: "center",
-            padding: "100px 20px",
-            background: "linear-gradient(180deg,#f8fafc,#ffffff)",
-            minHeight: "80vh"
-        }}>
+        <div className="hero">
 
-            <h1 style={{
-                fontSize: "3.5rem",
-                fontWeight: "bold"
-            }}>
-                TrustInvoice
-            </h1>
+            <div className="hero-content">
 
-            <p style={{
-                fontSize: "1.2rem",
-                color: "#64748b",
-                marginTop: "10px"
-            }}>
-                Convert invoices into NFTs & get funded instantly
-            </p>
+                <h1 className="hero-title">
+                    Trust the Invoice.
+                    <br />
+                    Fund the Future.
+                </h1>
 
+                <p className="hero-sub">
+                    Convert invoices into blockchain-backed assets
+                    and unlock instant liquidity without banks.
+                </p>
 
-            <button
-                onClick={handleConnect}
-                style={{
-                    marginTop: "30px",
-                    background: "#2563eb",
-                    color: "white",
-                    padding: "14px 28px",
-                    borderRadius: "12px",
-                    border: "none",
-                    fontWeight: "600",
-                    cursor: "pointer",
-                    boxShadow: "0 8px 20px rgba(0,0,0,0.08)"
-                }}
-            >
-                Connect Wallet
-            </button>
+                <button
+                    className="btn-accent hero-btn"
+                    onClick={handleConnect}
+                >
+                    Connect Wallet
+                </button>
+
+            </div>
 
 
-            <div style={{
-                marginTop: "80px",
-                display: "flex",
-                justifyContent: "center",
-                gap: "20px",
-                flexWrap: "wrap"
-            }}>
+            <div className="hero-cards">
 
-                <Card title="Instant Funding" icon="⚡"/>
-                <Card title="Blockchain Proof" icon="🔒"/>
-                <Card title="Reputation Score" icon="⭐"/>
+                <div className="feature-card">
+                    ⚡
+                    <h3>Instant Funding</h3>
+                    <p>Get liquidity in minutes</p>
+                </div>
+
+                <div className="feature-card">
+                    🔐
+                    <h3>Blockchain Proof</h3>
+                    <p>Immutable invoices</p>
+                </div>
+
+                <div className="feature-card">
+                    ⭐
+                    <h3>Trust Score</h3>
+                    <p>On-chain reputation</p>
+                </div>
 
             </div>
 
         </div>
 
     );
-
-}
-
-
-function Card({ title, icon }) {
-
-    return (
-
-        <div style={{
-            padding: "30px",
-            borderRadius: "16px",
-            background: "white",
-            boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
-            width: "220px"
-        }}>
-
-            <div style={{ fontSize: "2rem" }}>
-                {icon}
-            </div>
-
-            <h3>{title}</h3>
-
-        </div>
-
-    );
-
 }
