@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { FilePlus } from "lucide-react";
 
 export default function CreateInvoiceModal({
     open,
@@ -9,12 +10,11 @@ export default function CreateInvoiceModal({
     const [form, setForm] = useState({
         buyer: "",
         amount: "",
+        minBid: "",
         dueDate: ""
     });
 
-
     if (!open) return null;
-
 
     return (
 
@@ -24,7 +24,7 @@ export default function CreateInvoiceModal({
         >
 
             <div
-                className="modal"
+                className="modal premium-modal"
                 onClick={e => e.stopPropagation()}
             >
 
@@ -33,15 +33,15 @@ export default function CreateInvoiceModal({
                     <div>
 
                         <div className="modal-title">
+                            <FilePlus size={18}/>
                             Create Invoice
                         </div>
 
                         <div className="modal-sub">
-                            Mint invoice NFT
+                            Mint invoice NFT & list for auction
                         </div>
 
                     </div>
-
 
                     <button
                         className="modal-close"
@@ -51,7 +51,6 @@ export default function CreateInvoiceModal({
                     </button>
 
                 </div>
-
 
 
                 <div className="form-group">
@@ -80,12 +79,12 @@ export default function CreateInvoiceModal({
                     <div className="form-group">
 
                         <label className="form-label">
-                            Amount
+                            Amount (ETH)
                         </label>
 
                         <input
                             className="form-input"
-                            placeholder="ETH"
+                            placeholder="0.5"
                             onChange={e =>
                                 setForm({
                                     ...form,
@@ -100,21 +99,42 @@ export default function CreateInvoiceModal({
                     <div className="form-group">
 
                         <label className="form-label">
-                            Due Date
+                            Minimum Bid
                         </label>
 
                         <input
-                            type="date"
                             className="form-input"
+                            placeholder="0.3"
                             onChange={e =>
                                 setForm({
                                     ...form,
-                                    dueDate: e.target.value
+                                    minBid: e.target.value
                                 })
                             }
                         />
 
                     </div>
+
+                </div>
+
+
+
+                <div className="form-group">
+
+                    <label className="form-label">
+                        Due Date
+                    </label>
+
+                    <input
+                        type="date"
+                        className="form-input"
+                        onChange={e =>
+                            setForm({
+                                ...form,
+                                dueDate: e.target.value
+                            })
+                        }
+                    />
 
                 </div>
 
@@ -129,12 +149,11 @@ export default function CreateInvoiceModal({
                         Cancel
                     </button>
 
-
                     <button
                         className="btn-accent"
                         onClick={() => onCreate(form)}
                     >
-                        Create Invoice
+                        Create & List
                     </button>
 
                 </div>

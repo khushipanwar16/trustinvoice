@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ethers } from "ethers";
-import { getContracts } from "../utils/contract";
+import { getContracts, connectWallet } from "../utils/contract";
 
 export default function CreateInvoice() {
 
@@ -14,12 +14,28 @@ export default function CreateInvoice() {
 
         try {
 
-            setLoading(true);
+                console.log("Creating invoice...");
 
-            const {
-                nftContract,
-                auctionContract
-            } = await getContracts();
+                // validation first
+                if (!buyer || !amount || !minBid || !dueDate) {
+                    alert("Fill all fields");
+                    return;
+                }
+
+                setLoading(true);
+
+                // connect wallet once
+                await connectWallet();
+
+                console.log("Wallet connected");
+
+                const {
+                    nftContract,
+                    auctionContract
+                } = await getContracts();
+
+                console.log("Contracts loaded");
+
 
             // mint invoice NFT
             const tx = await nftContract.mintInvoice(
@@ -35,41 +51,59 @@ export default function CreateInvoice() {
                 "ipfs://placeholder"
             );
 
+            console.log("Mint tx sent");
+
             const receipt = await tx.wait();
 
-            // get token id
-            const tokenId =
-                receipt.logs[0].topics[3];
+            console.log("Mint confirmed");
 
-            const id =
-                parseInt(tokenId, 16);
+
+            // safer token id extraction
+            let tokenId;
+
+            try {
+                const event = receipt.logs.find(
+                    log => log.fragment?.name === "Transfer"
+                );
+
+                tokenId = Number(event.args.tokenId);
+
+            } catch {
+
+                // fallback
+                tokenId = receipt.logs[0].topics[3];
+                tokenId = parseInt(tokenId, 16);
+
+            }
+
+            console.log("Token ID:", tokenId);
+
 
             // approve auction contract
             const approveTx =
                 await nftContract.approve(
-
                     auctionContract.target,
-
-                    id
-
+                    tokenId
                 );
 
             await approveTx.wait();
+
+            console.log("Approved");
 
 
             // list auction
             const listTx =
                 await auctionContract.listInvoice(
-
-                    id,
-
+                    tokenId,
                     ethers.parseEther(minBid)
-
                 );
 
             await listTx.wait();
 
-            alert("Invoice Created & Listed!");
+            console.log("Listed");
+
+
+            alert("✅ Invoice Created & Listed!");
 
             setBuyer("");
             setAmount("");
@@ -78,102 +112,94 @@ export default function CreateInvoice() {
 
         } catch (err) {
 
-            console.error(err);
+            console.error("Create invoice error:", err);
 
-            alert("Error creating invoice");
+            alert(err?.reason || err?.message || "Error creating invoice");
 
-        }
+        }  finally {
+   setLoading(false);
+}
 
-        setLoading(false);
-
+        
     }
 
+ return (
 
-    return (
+<div className="page-container">
 
-        <div className="page-container form-container">
-    <div className="card"></div>
+{/* <h1 className="page-title">
+Create Invoice
+</h1> */}
 
-            <h2>Create Invoice</h2>
+<div className="create-wrapper">
 
+<div className="create-card">
 
-            <div className="form-group">
-
-                <label>Buyer Address</label>
-
-                <input
-                    className="form-input"
-                    placeholder="0x..."
-                    value={buyer}
-                    onChange={(e) =>
-                        setBuyer(e.target.value)
-                    }
-                />
-
-            </div>
+{/* <h2>Create Invoice</h2> */}
 
 
-            <div className="form-group">
+<div className="form-group">
+<label>Buyer Address</label>
 
-                <label>Amount (ETH)</label>
-
-                <input
-                    className="form-input"
-                    placeholder="0.5"
-                    value={amount}
-                    onChange={(e) =>
-                        setAmount(e.target.value)
-                    }
-                />
-
-            </div>
+<input
+className="form-input"
+placeholder="0x..."
+value={buyer}
+onChange={(e)=>setBuyer(e.target.value)}
+/>
+</div>
 
 
-            <div className="form-group">
+<div className="form-group">
+<label>Amount (ETH)</label>
 
-                <label>Minimum Bid</label>
-
-                <input
-                    className="form-input"
-                    placeholder="0.4"
-                    value={minBid}
-                    onChange={(e) =>
-                        setMinBid(e.target.value)
-                    }
-                />
-
-            </div>
+<input
+className="form-input"
+placeholder="0.5"
+value={amount}
+onChange={(e)=>setAmount(e.target.value)}
+/>
+</div>
 
 
-            <div className="form-group">
+<div className="form-group">
+<label>Minimum Bid</label>
 
-                <label>Due Date</label>
-
-                <input
-                    className="form-input"
-                    type="date"
-                    value={dueDate}
-                    onChange={(e) =>
-                        setDueDate(e.target.value)
-                    }
-                />
-
-            </div>
+<input
+className="form-input"
+placeholder="0.4"
+value={minBid}
+onChange={(e)=>setMinBid(e.target.value)}
+/>
+</div>
 
 
-            <button
-                className="btn-accent"
-                onClick={createInvoice}
-            >
+<div className="form-group">
+<label>Due Date</label>
 
-                {loading
-                    ? "Creating..."
-                    : "Create & List"}
+<input
+type="date"
+className="form-input"
+value={dueDate}
+onChange={(e)=>setDueDate(e.target.value)}
+/>
+</div>
 
-            </button>
 
-        </div>
+<button
+className="btn-accent create-btn"
+onClick={createInvoice}
+>
+{loading ? "Creating..." : "Create & List"}
+</button>
 
-    );
+</div>
+
+</div>
+
+</div>
+
+);
+    
 
 }

@@ -1,29 +1,33 @@
 export default function StatCard({
-    label,
+    icon,
+    title,
     value,
-    sub,
-    icon
+    subtitle
 }) {
 
     return (
 
         <div className="stat-card">
 
-            <div className="stat-label">
-                {label}
+            <div className="stat-header">
+                <div className="stat-title">
+                    {title}
+                </div>
+
+                <div className="stat-icon">
+                    {icon}
+                </div>
             </div>
 
             <div className="stat-value">
                 {value}
             </div>
 
-            <div className="stat-sub">
-                {sub}
-            </div>
-
-            <div className="stat-icon">
-                {icon}
-            </div>
+            {subtitle && (
+                <div className="stat-sub">
+                    {subtitle}
+                </div>
+            )}
 
         </div>
 

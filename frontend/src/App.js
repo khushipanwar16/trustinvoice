@@ -11,6 +11,7 @@ import Topbar from "./layout/Topbar";
 
 import "./styles/trustinvoice.css";
 
+
 export default function App() {
 
     const [wallet, setWallet] = useState("");
@@ -69,14 +70,17 @@ export default function App() {
                 />
 
                 {page === "home" && (
-                    <Home 
+                    <Home
                         handleConnect={handleConnect}
                         wallet={wallet}
                     />
                 )}
 
                 {page === "dashboard" && (
-                    <Dashboard wallet={wallet} />
+                    <Dashboard 
+  wallet={wallet}
+  setPage={setPage}
+/>
                 )}
 
                 {page === "marketplace" && (

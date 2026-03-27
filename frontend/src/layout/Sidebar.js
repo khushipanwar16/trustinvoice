@@ -1,94 +1,109 @@
-import React from "react";
+import { useState } from "react";
+import {
+  Home,
+  LayoutDashboard,
+  Store,
+  PlusCircle,
+  ChevronLeft,
+  ChevronRight
+} from "lucide-react";
 
 export default function Sidebar({ page, setPage, wallet }) {
+
+    const [collapsed, setCollapsed] = useState(false);
 
     const Item = ({ label, value, icon }) => (
 
         <div
-            className={`nav-item ${page === value ? "active" : ""}`}
+            className={`sidebar-item ${page === value ? "active" : ""}`}
             onClick={() => setPage(value)}
         >
-            <span style={{ marginRight: "8px" }}>{icon}</span>
-            {label}
+            <div className="sidebar-icon">{icon}</div>
+
+            {!collapsed && (
+                <div className="sidebar-text">
+                    {label}
+                </div>
+            )}
         </div>
 
     );
 
-
     return (
 
-        <div className="sidebar">
+        <div className={`sidebar ${collapsed ? "collapsed" : ""}`}>
 
-            <div className="sidebar-logo">
+            <div className="sidebar-header">
 
-                <div className="sidebar-logo-icon">
+                <div className="sidebar-logo">
                     🔗
                 </div>
 
-               <div className="sidebar-logo-text brand">
-TrustInvoice
-</div>
+                {!collapsed && (
+                    <div className="sidebar-title">
+                        TrustInvoice
+                    </div>
+                )}
 
             </div>
 
 
+            <div className="sidebar-nav">
 
-            <div className="nav-label">
-                MAIN
+                <Item
+  label="Home"
+  value="home"
+  icon={<Home size={20} />}
+/>
+
+<Item
+  label="Dashboard"
+  value="dashboard"
+  icon={<LayoutDashboard size={20} />}
+/>
+
+<Item
+  label="Marketplace"
+  value="marketplace"
+  icon={<Store size={20} />}
+/>
+
+<Item
+  label="Create Invoice"
+  value="create"
+  icon={<PlusCircle size={20} />}
+/>
+
             </div>
 
 
-            <Item
-                label="Home"
-                value="home"
-                icon="🏠"
-            />
+            <div className="sidebar-footer">
 
-            <Item
-                label="Dashboard"
-                value="dashboard"
-                icon="📊"
-            />
+                <button
+                    className="toggle-btn"
+                    onClick={() => setCollapsed(!collapsed)}
+                >
+                    {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+                </button>
 
 
-            <Item
-                label="Marketplace"
-                value="marketplace"
-                icon="🏪"
-            />
+                {!collapsed && (
 
+                    <div className="wallet-box">
 
-            <div className="nav-label">
-                ACTIONS
-            </div>
+                        <div className="wallet-status">
+                            {wallet ? "Connected" : "Disconnected"}
+                        </div>
 
+                        <div className="wallet-address">
+                            {wallet
+                                ? `${wallet.slice(0,6)}...${wallet.slice(-4)}`
+                                : "Not Connected"}
+                        </div>
 
-            <Item
-                label="Create Invoice"
-                value="create"
-                icon="➕"
-            />
-
-
-
-            <div className="sidebar-wallet">
-
-                <div className="wallet-indicator">
-
-                    <div className="wallet-dot" />
-
-                    <div className="wallet-label">
-                        {wallet ? "Connected" : "Disconnected"}
                     </div>
 
-                </div>
-
-
-                <div className="wallet-addr">
-                    {wallet
-                        ? `${wallet.slice(0,6)}...${wallet.slice(-4)}`
-                        : "Not connected"}
-                </div>
+                )}
 
             </div>
 

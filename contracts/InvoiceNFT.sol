@@ -67,4 +67,24 @@ contract InvoiceNFT is ERC721 {
     function getInvoice(uint256 _id) public view returns (Invoice memory) {
         return invoices[_id];
     }
+
+
+    function payInvoice(uint256 _id) public payable {
+
+    Invoice storage inv = invoices[_id];
+
+    require(inv.buyer == msg.sender, "Only buyer can pay");
+    require(!inv.isPaid, "Already paid");
+    require(msg.value >= inv.amount, "Insufficient payment");
+
+    inv.isPaid = true;
+
+    // transfer ETH to seller
+    payable(inv.seller).transfer(msg.value);
+
+    // increase buyer reputation
+    reputationScore[msg.sender] += 10;
+
+    emit InvoicePaid(_id);
+}
 }

@@ -2,18 +2,25 @@ import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { getContracts } from "../utils/contract";
 import StatCard from "../components/StatCard";
-import CreateInvoiceModal from "../components/CreateInvoiceModal";
+
 import InvoiceDetailModal from "../components/InvoiceDetailModal";
 import Skeleton from "../components/Skeleton";
+import {
+  Wallet,
+  Star,
+  FileText,
+  BarChart3,
+  
+} from "lucide-react";
 
-export default function Dashboard() {
+export default function Dashboard({ setPage }) {
 
     const [wallet, setWallet] = useState("");
     const [reputation, setReputation] = useState(0);
     const [myInvoices, setMyInvoices] = useState([]);
     const [myListings, setMyListings] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [showModal, setShowModal] = useState(false);
+    
     const [selectedInvoice, setSelectedInvoice] = useState(null);
 
 
@@ -160,50 +167,54 @@ export default function Dashboard() {
 
 
     return (
+
+
+          
         
         
             <div className="page-container">
             <div style={{ marginBottom: "20px" }}>
-                <button
-                    className="btn-accent"
-                    onClick={() => setShowModal(true)}
-                >
+               <button
+className="btn-accent"
+onClick={() => setPage("create")}
+>
+                
                     + Create Invoice
                 </button>
             </div>
 
 
-            <div className="stats-grid">
+           <div className="dashboard-cards">
 
-                <StatCard
-                    label="Wallet"
-                    value={`${wallet.slice(0,6)}...${wallet.slice(-4)}`}
-                    sub="Connected"
-                    icon="👛"
-                />
+<StatCard
+    icon={<Wallet size={18} />}
+    title="Wallet"
+    value={wallet ? `${wallet.slice(0,6)}...${wallet.slice(-4)}` : "Not Connected"}
+    subtitle="Connected Address"
+/>
 
-                <StatCard
-                    label="Reputation"
-                    value={reputation}
-                    sub="Trust score"
-                    icon="⭐"
-                />
+<StatCard
+    icon={<Star size={18} />}
+    title="Reputation"
+    value={reputation}
+    subtitle="Trust Score"
+/>
 
-                <StatCard
-                    label="Invoices"
-                    value={myInvoices.length}
-                    sub="Created"
-                    icon="🧾"
-                />
+<StatCard
+    icon={<FileText size={18} />}
+    title="Invoices"
+    value={myInvoices.length}
+    subtitle="Created"
+/>
 
-                <StatCard
-                    label="Active Auctions"
-                    value={myListings.length}
-                    sub="Live"
-                    icon="📊"
-                />
+<StatCard
+    icon={<BarChart3 size={18} />}
+    title="Active Auctions"
+    value={myListings.length}
+    subtitle="Live"
+/>
 
-            </div>
+</div>
 
 
 
@@ -460,14 +471,7 @@ export default function Dashboard() {
 
 
 
-            <CreateInvoiceModal
-                open={showModal}
-                onClose={() => setShowModal(false)}
-                onCreate={(data) => {
-                    console.log(data);
-                    setShowModal(false);
-                }}
-            />
+            
 
             
 

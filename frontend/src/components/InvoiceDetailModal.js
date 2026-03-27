@@ -7,11 +7,18 @@ export default function InvoiceDetailModal({
     open,
     invoice,
     onClose,
-    onSuccess
+    onSuccess,
+    wallet
 }) {
 
     const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState("");
+const [message, setMessage] = useState("");
+
+const isBuyer =
+wallet?.toLowerCase() ===
+invoice?.buyer?.toLowerCase();
+
+    
 
     if (!open || !invoice) return null;
 
@@ -25,11 +32,13 @@ export default function InvoiceDetailModal({
 
             const { nftContract } = await getContracts();
 
+            console.log("Invoice:", invoice);
+
             const tx = await nftContract.payInvoice(
                 invoice.id,
                 {
                     value: ethers.parseEther(
-                        invoice.amount
+                        invoice.amount.toString()
                     )
                 }
             );
@@ -39,14 +48,21 @@ export default function InvoiceDetailModal({
             setMessage("✅ Invoice Paid");
 
             setTimeout(() => {
-    setLoading(false);
-    onClose();
-    onSuccess && onSuccess();
-}, 1200);
+                setLoading(false);
+                onClose();
+                onSuccess && onSuccess();
+            }, 1200);
 
         } catch (err) {
 
-            setMessage("❌ Transaction Failed");
+            console.error("PAY ERROR:", err);
+
+            setMessage(
+                err?.reason ||
+                err?.data?.message ||
+                err?.message ||
+                "Transaction Failed"
+            );
 
             setTimeout(() => {
                 setLoading(false);
@@ -77,14 +93,21 @@ export default function InvoiceDetailModal({
             setMessage("⚠️ Dispute Raised");
 
             setTimeout(() => {
-    setLoading(false);
-    onClose();
-    onSuccess && onSuccess();
-}, 1200);
+                setLoading(false);
+                onClose();
+                onSuccess && onSuccess();
+            }, 1200);
 
         } catch (err) {
 
-            setMessage("❌ Transaction Failed");
+            console.error(err);
+
+            setMessage(
+                err?.reason ||
+                err?.data?.message ||
+                err?.message ||
+                "Transaction Failed"
+            );
 
             setTimeout(() => {
                 setLoading(false);
@@ -175,10 +198,10 @@ export default function InvoiceDetailModal({
                 <div className="detail-actions">
 
                     <button
-                        className="btn-pay"
-                        onClick={payInvoice}
-                        disabled={loading}
-                    >
+    className="btn-pay"
+    onClick={payInvoice}
+    disabled={!isBuyer || loading}
+>
                         Pay Invoice
                     </button>
 
