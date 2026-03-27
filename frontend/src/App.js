@@ -27,7 +27,6 @@ export default function App() {
 
                     if (accounts.length > 0) {
                         setWallet(accounts[0]);
-                        setPage("dashboard");
                     }
 
                 });
@@ -44,7 +43,6 @@ export default function App() {
 
         if (address) {
             setWallet(address);
-            setPage("dashboard");
         }
 
     }
@@ -61,7 +59,6 @@ export default function App() {
                 wallet={wallet}
             />
 
-
             <div className="main">
 
                 <Topbar
@@ -72,19 +69,22 @@ export default function App() {
                 />
 
                 {page === "home" && (
-                    <Home handleConnect={handleConnect} />
+                    <Home 
+                        handleConnect={handleConnect}
+                        wallet={wallet}
+                    />
                 )}
 
                 {page === "dashboard" && (
-                    <Dashboard />
+                    <Dashboard wallet={wallet} />
                 )}
 
                 {page === "marketplace" && (
-                    <Marketplace />
+                    <Marketplace wallet={wallet} />
                 )}
 
                 {page === "create" && (
-                    <CreateInvoice />
+                    <CreateInvoice wallet={wallet} />
                 )}
 
             </div>
